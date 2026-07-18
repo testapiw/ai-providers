@@ -349,6 +349,13 @@ Below are screenshots from running the provider tests:
 ### DeepSeek Test
 ![DeepSeek Test Results](images/test-openai.png)
 
+
+## Supported Models & Features
+
+### OpenAI Architecture Fix (v1.0.2)
+Starting from version `1.0.2`, the provider includes native handling for next-generation reasoning models (`gpt-5`, `gpt-5-mini`, and `o`-series). 
+
+
 ## License
 
 ISC
