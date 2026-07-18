@@ -32,71 +32,46 @@ export default class OpenAIProvider extends BaseProvider {
 
     }
 
-    buildBody(request) {
+buildBody(request) {
+    const input = [];
 
-        const input = [];
-
-        if (request.system) {
-
-            input.push({
-
-                role: "system",
-
-                content: [
-
-                    {
-
-                        type: "input_text",
-
-                        text: request.system
-
-                    }
-
-                ]
-
-            });
-
-        }
-
+    if (request.system) {
         input.push({
-
-            role: "user",
-
+            role: "system",
             content: [
-
                 {
-
                     type: "input_text",
-
-                    text: request.prompt
-
+                    text: request.system
                 }
-
             ]
-
         });
-
-        return {
-
-            model: this.model.apiModel,
-
-            input,
-
-            temperature:
-
-                request.temperature ??
-
-                this.model.temperature,
-
-            max_output_tokens:
-
-                request.maxTokens ??
-
-                this.model.maxTokens
-
-        };
-
     }
+
+    input.push({
+        role: "user",
+        content: [
+            {
+                type: "input_text",
+                text: request.prompt
+            }
+        ]
+    });
+
+    const body = {
+        model: this.model.apiModel,
+        input,
+        max_output_tokens: request.maxTokens ?? this.model.maxTokens
+    };
+
+    // Модели gpt-5 и o-серии не поддерживают сэмплинг через temperature
+    const isReasoningModel = this.model.apiModel.startsWith('gpt-5') || this.model.apiModel.startsWith('o');
+
+    if (!isReasoningModel) {
+        body.temperature = request.temperature ?? this.model.temperature;
+    }
+
+    return body;
+}
 
     parseResponse(response) {
 

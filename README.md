@@ -346,6 +346,9 @@ Below are screenshots from running the provider tests:
 ### DeepSeek Test
 ![DeepSeek Test Results](images/test-deepseek.png)
 
+### DeepSeek Test
+![DeepSeek Test Results](images/test-openai.png)
+
 ## License
 
 ISC

@@ -1,6 +1,6 @@
 {
   "name": "@testapiw/ai-providers",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A unified JavaScript SDK for interacting with multiple AI provider APIs (OpenAI, Anthropic, Google, DeepSeek)",
   "type": "module",
   "main": "src/index.js",
@@ -17,8 +17,8 @@
     "test:deepseek": "node tests/providers/deepseek.test.js",
     "test:google": "node tests/providers/google.test.js",
     "test:anthropic": "node tests/providers/anthropic.test.js",
-    "test:logger": "node tests/integration/logger.test.js",
-    "test": "node tests/providers/google.test.js && node tests/providers/anthropic.test.js && node tests/providers/deepseek.test.js"
+    "test:openai": "node tests/providers/openai.test.js",
+    "test:logger": "node tests/integration/logger.test.js"
   },
   "keywords": [
     "ai",
