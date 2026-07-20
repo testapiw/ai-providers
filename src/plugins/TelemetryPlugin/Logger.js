@@ -4,25 +4,18 @@ import FileWriter from "./FileWriter.js";
 
 export default class Logger {
 
-    constructor(config) {
+    constructor(config = {}) {
 
         this.writer = new FileWriter(config);
 
-        this.aiLog = path.join(
+        const {
 
-            config.directory,
+            directory = "./logs"
 
-            "ai.log"
+        } = config;
 
-        );
-
-        this.errorLog = path.join(
-
-            config.directory,
-
-            "errors.log"
-
-        );
+        this.aiLog = path.join(directory, "ai.log");
+        this.errorLog = path.join(directory, "errors.log");
 
     }
 

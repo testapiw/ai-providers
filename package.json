@@ -1,6 +1,6 @@
 {
   "name": "@testapiw/ai-providers",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A unified JavaScript SDK for interacting with multiple AI provider APIs (OpenAI, Anthropic, Google, DeepSeek)",
   "type": "module",
   "main": "src/index.js",

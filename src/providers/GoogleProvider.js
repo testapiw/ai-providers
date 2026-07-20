@@ -17,7 +17,21 @@ export default class GoogleProvider extends BaseProvider {
 
     }
 
-    async generate(request) {
+    buildUrl() {
+        return `${this.baseUrl}/v1beta/interactions`;
+    }
+
+    buildHeaders() {
+        return {
+
+                    "x-goog-api-key": this.apiKey,
+
+                    "Api-Revision": "2026-05-20"
+
+                };
+    }
+
+    buildBody(request) {
 
         const body = {
 
@@ -41,29 +55,15 @@ export default class GoogleProvider extends BaseProvider {
 
         }
 
-        const response = await this.http.post(
+        return body;
 
-            `${this.baseUrl}/v1beta/interactions`,
+    }
 
-            {
-
-                headers: {
-
-                    "x-goog-api-key": this.apiKey,
-
-                    "Api-Revision": "2026-05-20"
-
-                },
-
-                body
-
-            }
-
-        );
+    parseResponse(response) {
 
         let text = "";
 
-        const outputStep = response.steps?.find(
+        const outputStep = response.body.steps?.find(
 
             step => step.type === "model_output"
 
@@ -85,35 +85,35 @@ export default class GoogleProvider extends BaseProvider {
 
         return this.result({
 
+            status: response.status,
+
             text,
-
-            finishReason:
-
-                response.status,
 
             usage: {
 
                 promptTokens:
-
-                    response.usage?.total_input_tokens ?? 0,
+                    response.body.usage?.total_input_tokens ?? 0,
 
                 completionTokens:
-
-                    response.usage?.total_output_tokens ?? 0,
+                    response.body.usage?.total_output_tokens ?? 0,
 
                 totalTokens:
-
-                    response.usage?.total_tokens ?? 0,
+                    response.body.usage?.total_tokens ?? 0,
 
                 reasoningTokens:
+                    response.body.usage?.total_thought_tokens ?? 0,
 
-                    response.usage?.total_thought_tokens ?? 0
+                cachedTokens:
+                    response.body.usage?.total_cached_tokens ?? 0
 
             },
+
+            finishReason:
+                response.body.status,
 
             raw: response
 
         });
-    }
 
+    }
 }

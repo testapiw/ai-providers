@@ -8,9 +8,15 @@ export default class Metrics {
 
         this.writer = new FileWriter(config);
 
+        const {
+
+            directory = "./logs"
+
+        } = config;
+
         this.file = path.join(
 
-            config.directory,
+            directory,
 
             "metrics.log"
 

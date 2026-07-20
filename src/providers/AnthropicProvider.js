@@ -64,37 +64,38 @@ export default class AnthropicProvider extends BaseProvider {
 
         const text =
 
-            response.content
+            response.body.content
 
                 ?.map(item => item.text)
 
                 .join("") ?? "";
 
         return this.result({
+            
+            status: response.status,
 
             text,
-
-            finishReason:
-
-                response.stop_reason,
 
             usage: {
 
                 promptTokens:
 
-                    response.usage?.input_tokens,
+                    response.body.usage?.input_tokens,
 
                 completionTokens:
 
-                    response.usage?.output_tokens,
+                    response.body.usage?.output_tokens,
 
                 totalTokens:
 
-                    (response.usage?.input_tokens ?? 0) +
+                    (response.body.usage?.input_tokens ?? 0) +
 
-                    (response.usage?.output_tokens ?? 0)
+                    (response.body.usage?.output_tokens ?? 0)
 
             },
+
+            finishReason:
+                response.body.status,
 
             raw: response
 

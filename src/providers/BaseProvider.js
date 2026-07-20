@@ -2,11 +2,11 @@ import HttpClient from "../core/HttpClient.js";
 
 export default class BaseProvider {
 
-    constructor(model, config) {
+    constructor(model, http) {
 
         this.model = model;
 
-        this.http = new HttpClient(config.http);
+        this.http = new HttpClient(http);
 
     }
 
@@ -16,6 +16,22 @@ export default class BaseProvider {
 
     get baseUrl() {
         throw new Error("baseUrl not implemented");
+    }
+
+    buildUrl() {
+        throw new Error("buildUrl() not implemented");
+    }
+
+    buildHeaders() {
+        return {};
+    }
+
+    buildBody() {
+        throw new Error("buildBody() not implemented");
+    }
+
+    parseResponse() {
+        throw new Error("parseResponse() not implemented");
     }
 
     async generate(request) {
@@ -38,23 +54,9 @@ export default class BaseProvider {
 
     }
 
-    buildUrl() {
-        throw new Error("buildUrl() not implemented");
-    }
-
-    buildHeaders() {
-        return {};
-    }
-
-    buildBody() {
-        throw new Error("buildBody() not implemented");
-    }
-
-    parseResponse() {
-        throw new Error("parseResponse() not implemented");
-    }
-
     result({
+
+        status = "",
 
         text = "",
 
@@ -62,33 +64,40 @@ export default class BaseProvider {
 
         finishReason = null,
 
-        raw = null,
-
         retries = 0,
 
-        metadata = {}
+        metadata = {},
+
+        raw = null
 
     }) {
 
         return {
+            
+            status,
 
             text,
 
             usage: {
 
                 promptTokens:
+
                     usage.promptTokens ?? 0,
 
                 completionTokens:
+
                     usage.completionTokens ?? 0,
 
                 totalTokens:
+
                     usage.totalTokens ?? 0,
 
                 reasoningTokens:
+
                     usage.reasoningTokens ?? 0,
 
                 cachedTokens:
+
                     usage.cachedTokens ?? 0
 
             },

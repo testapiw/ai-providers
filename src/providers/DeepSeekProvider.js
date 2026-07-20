@@ -60,26 +60,35 @@ export default class DeepSeekProvider extends BaseProvider {
 
     parseResponse(response) {
 
-        const choice = response.choices?.[0];
+        const choice = response.body.choices?.[0];
 
         return this.result({
 
-            text: choice?.message?.content,
+            status: response.status,
 
-            finishReason: choice?.finish_reason,
+            text: choice?.message?.content,
 
             usage: {
 
                 promptTokens:
-                    response.usage?.prompt_tokens,
+                    response.body.usage?.prompt_tokens,
 
                 completionTokens:
-                    response.usage?.completion_tokens,
+                    response.body.usage?.completion_tokens,
 
                 totalTokens:
-                    response.usage?.total_tokens
+                    response.body.usage?.total_tokens,
+
+                reasoningTokens:
+                    response.body.usage?.total_thought_tokens ?? 0,
+
+                cachedTokens:
+                    response.body.usage?.prompt_cache_hit_tokens ?? 0  // prompt_cache_hit_tokens
 
             },
+
+            finishReason:
+                response.body.status,
 
             raw: response
 

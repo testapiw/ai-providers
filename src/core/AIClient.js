@@ -1,31 +1,22 @@
+import EventEmitter from "./EventEmitter.js";
 import ProviderFactory from "./ProviderFactory.js";
-import Cost from "./Cost.js";
+import Plugin from "./Plugin.js";
 
-import Logger from "../utils/telemetry/Logger.js";
-import Metrics from "../utils/telemetry/Metrics.js";
-
-export default class AIClient {
+export default class AIClient extends EventEmitter {
 
     constructor(config) {
 
+        super();
+
         this.config = config;
 
-        this.models = config.models.models;
+        this._models = config.models.models;
 
-        this.telemetryEnabled =
-            config.telemetry?.enabled ?? false;
+    }
 
-        if (this.telemetryEnabled) {
+    get models() {
 
-            this.logger = new Logger(
-                config.telemetry
-            );
-
-            this.metrics = new Metrics(
-                config.telemetry
-            );
-
-        }
+        return this._models;
 
     }
 
@@ -33,7 +24,7 @@ export default class AIClient {
 
         const started = Date.now();
 
-        const model = this.models[request.model];
+        const model = this._models[request.model];
 
         if (!model) {
 
@@ -69,155 +60,149 @@ export default class AIClient {
 
         };
 
-        let result;
-
-        try {
-
-            result = await provider.generate(
-                payload
-            );
-
-        }
-        catch (error) {
-
-            const duration =
-                Date.now() - started;
-
-            Object.assign(error, {
-
-                provider: model.provider,
-
-                model: request.model,
-
-                duration
-
-            });
-
-            if (this.telemetryEnabled) {
-
-                await this.logger.error({
-
-                    provider: model.provider,
-
-                    model: request.model,
-
-                    duration,
-
-                    error: error.message
-
-                });
-
-                await this.metrics.save({
-
-                    provider: model.provider,
-
-                    model: request.model,
-
-                    duration,
-
-                    retries: error.retries ?? 0,
-
-                    status: "error",
-
-                    error: error.message
-
-                });
-
-            }
-
-            throw error;
-
-        }
-
-        const duration =
-            Date.now() - started;
-
-        const usage = result.usage ?? {
-
-            promptTokens: 0,
-
-            completionTokens: 0,
-
-            totalTokens: 0
-
-        };
-
-        const cost = Cost.calculate(
-
-            request.model,
-
-            usage,
-
-            this.models
-
-        );
-
-        if (this.telemetryEnabled) {
-
-            await this.logger.info({
-
-                provider: model.provider,
-
-                model: request.model,
-
-                duration,
-
-                usage,
-
-                cost
-
-            });
-
-            await this.metrics.save({
-
-                provider: model.provider,
-
-                model: request.model,
-
-                duration,
-
-                promptTokens: usage.promptTokens,
-
-                completionTokens:
-                    usage.completionTokens,
-
-                totalTokens:
-                    usage.totalTokens,
-
-                cost: cost.total,
-
-                retries:
-                    result.retries ?? 0,
-
-                status: "success"
-
-            });
-
-        }
-
-        return {
-
-            success: true,
+        const context = {
 
             provider: model.provider,
 
             model: request.model,
 
-            text: result.text,
-
-            usage,
-
-            cost,
-
-            duration,
-
-            finishReason:
-                result.finishReason,
-
-            raw: result.raw
+            request: payload
 
         };
 
+        await this.emit(
+
+            "request:start",
+
+            context
+
+        );
+
+        try {
+
+            const result = await provider.generate(
+
+                payload
+
+            );
+
+            Object.assign(context, {
+
+                success: true,
+
+                status: result.status,
+
+                text: result.text,
+
+                usage: result.usage ?? {
+
+                    promptTokens: 0,
+
+                    completionTokens: 0,
+
+                    totalTokens: 0
+
+                },
+
+                duration:
+
+                    Date.now() - started,
+
+                finishReason:
+
+                    result.finishReason,
+
+                raw: result.raw
+
+            });
+
+            await this.emit(
+
+                "request:success",
+
+                context
+
+            );
+
+            return context;
+
+        }
+
+        catch (error) {
+
+            Object.assign(context, {
+
+                success: false,
+
+                status: error.status,
+
+                duration:
+
+                    Date.now() - started,
+
+                error
+
+            });
+
+            await this.emit(
+
+                "request:error",
+
+                context
+
+            );
+
+            throw error;
+
+        }
+
+        finally {
+
+            await this.emit(
+
+                "request:finish",
+
+                context
+
+            );
+
+        }
+
     }
 
+    plugins(...plugins) {
+
+        for (const plugin of plugins.flat()) {
+
+            this.use(plugin);
+
+        }
+
+        return this;
+
+    }
+
+    use(plugin) {
+
+        this.#isPlugin(plugin);
+
+        plugin.install(this);
+
+        return this;
+
+    }
+
+    #isPlugin(plugin) {
+
+        if (!(plugin instanceof Plugin)) {
+
+            throw new TypeError(
+
+                `${plugin?.constructor?.name ?? plugin} is not a Plugin`
+
+            );
+
+        }
+
+    }
 }

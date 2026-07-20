@@ -77,7 +77,7 @@ buildBody(request) {
 
         const output =
 
-            response.output?.find(
+            response.body.output?.find(
 
                 item => item.type === "message"
 
@@ -95,27 +95,29 @@ buildBody(request) {
 
             text,
 
-            finishReason:
-                response.status,
+            status: response.status,
 
             usage: {
 
                 promptTokens:
-                    response.usage?.input_tokens,
+                    response.body.usage?.input_tokens,
 
                 completionTokens:
-                    response.usage?.output_tokens,
+                    response.body.usage?.output_tokens,
 
                 totalTokens:
-                    response.usage?.total_tokens,
+                    response.body.usage?.total_tokens,
 
                 reasoningTokens:
-                    response.usage?.output_tokens_details?.reasoning_tokens,
+                    response.body.usage?.output_tokens_details?.reasoning_tokens,
 
                 cachedTokens:
-                    response.usage?.input_tokens_details?.cached_tokens
+                    response.body.usage?.input_tokens_details?.cached_tokens
 
             },
+
+            finishReason:
+                response.body.status,
 
             raw: response
 

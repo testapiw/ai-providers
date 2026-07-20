@@ -8,19 +8,27 @@ export default class FileWriter {
 
     static mutexes = new Map();
 
-    constructor(config) {
+    constructor({
+
+        directory = "./logs",
+
+        maxFileSize = 3 * 1024 * 1024,
+
+        revisions = 7
+
+    } = {}) {
+
+        this.directory = directory;
 
         this.rotation = new FileRotation({
 
-            maxSize: config.maxFileSize,
+            maxSize: maxFileSize,
 
-            revisions: config.revisions
+            revisions
 
         });
 
-        const key = path.resolve(
-            config.directory
-        );
+        const key = path.resolve(directory);
 
         if (!FileWriter.mutexes.has(key)) {
 

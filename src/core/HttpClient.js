@@ -53,7 +53,15 @@ export default class HttpClient {
 
                 },
 
-                body: body ? JSON.stringify(body) : undefined,
+                body:
+
+                    method === "GET"
+
+                        ? undefined
+
+                        : body
+                            ? JSON.stringify(body)
+                            : undefined,
 
                 headersTimeout: this.timeout,
 
@@ -86,7 +94,15 @@ export default class HttpClient {
 
             }
 
-            return result;
+            return {
+
+                status: response.statusCode,
+
+                headers: response.headers,
+
+                body: result
+
+            };
 
         }, {
 
@@ -95,65 +111,6 @@ export default class HttpClient {
             delay: this.retryDelay
 
         });
-
-    }
-
-    async stream(url, {
-
-        headers = {},
-
-        body
-
-    } = {}) {
-
-        const response = await request(url, {
-
-            method: "POST",
-
-            headers: {
-
-                accept: "text/event-stream",
-
-                "content-type": "application/json",
-
-                ...headers
-
-            },
-
-            body: JSON.stringify(body),
-
-            headersTimeout: this.timeout,
-
-            bodyTimeout: this.timeout
-
-        });
-
-        if (response.statusCode >= 400) {
-
-            const result = await this.parseResponse(response);
-
-            throw new AIError({
-
-                message: this.extractError(
-                    result,
-                    response.statusCode
-                ),
-
-                status: response.statusCode,
-
-                retryable: Retry.isRetryable({
-
-                    status: response.statusCode
-
-                }),
-
-                raw: result
-
-            });
-
-        }
-
-        return response.body;
 
     }
 
@@ -208,5 +165,4 @@ export default class HttpClient {
         );
 
     }
-
 }

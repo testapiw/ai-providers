@@ -13,28 +13,30 @@ A unified JavaScript SDK for interacting with multiple AI provider APIs (OpenAI,
 npm install @testapiw/ai-providers
 ```
 
+**Available Exports:**
+```javascript
+import AIClient from "@testapiw/ai-providers";              // Default export
+import { Plugin, BillingPlugin, TelemetryPlugin } from "@testapiw/ai-providers"; // Named exports
+```
+
 ## Quick Start
 
 ```javascript
-import AIClient from "@testapiw/ai-providers";
+import AIClient, { BillingPlugin, TelemetryPlugin } from "@testapiw/ai-providers";
 import models from "./config/models.json" with { type: "json" };
 
-const config = {
+// Initialize client with plugins
+const ai = new AIClient({ 
     models,
     http: {
         timeout: 60000,
         retries: 3,
         retryDelay: 1000
-    },
-    telemetry: {
-        enabled: true,
-        directory: "./logs",
-        maxFileSize: 3 * 1024 * 1024,
-        revisions: 7
     }
-};
-
-const ai = new AIClient(config);
+}).plugins(
+    new BillingPlugin(),
+    new TelemetryPlugin()
+);
 
 const response = await ai.generate({
     model: "gemini-2.5-flash-lite",
@@ -51,56 +53,77 @@ console.log(`Cost: $${response.cost.total.toFixed(6)}`);
 This library provides a simplified abstraction layer for working with multiple AI provider APIs through a unified interface. It demonstrates key capabilities including:
 
 - **Multi-provider support**: OpenAI, Anthropic (Claude), Google (Gemini), DeepSeek
+- **Plugin architecture**: Modular system for extending functionality
+- **Event system**: Lifecycle events for monitoring and customization
 - **Automatic retry logic**: Handles transient failures with configurable retry policies
-- **Cost tracking**: Calculates API costs based on token usage
-- **Telemetry**: Optional logging and metrics collection
+- **Cost tracking**: Via BillingPlugin for detailed usage analytics
+- **Telemetry**: Via TelemetryPlugin for logging and metrics
 - **Provider abstraction**: Single interface for all AI providers
 
 ## Architecture
 
 ```mermaid
 graph TD
-    A[AIClient] --> B[ProviderFactory]
-    B --> C[BaseProvider]
-    C --> D[GoogleProvider]
-    C --> E[AnthropicProvider]
-    C --> F[DeepSeekProvider]
-    C --> G[OpenAIProvider]
+    A[AIClient] --> B[EventEmitter]
+    A --> C[ProviderFactory]
+    A --> D[Plugin System]
     
-    D --> H[HttpClient]
-    E --> H
-    F --> H
-    G --> H
+    C --> E[BaseProvider]
+    E --> F[GoogleProvider]
+    E --> G[AnthropicProvider]
+    E --> H[DeepSeekProvider]
+    E --> I[OpenAIProvider]
     
-    H --> I[Retry Logic]
+    F --> J[HttpClient]
+    G --> J
+    H --> J
+    I --> J
     
-    A --> J[Cost Calculator]
-    A --> K[Logger]
-    A --> L[Metrics]
+    J --> K[Retry Logic]
+    
+    D --> L[BillingPlugin]
+    D --> M[TelemetryPlugin]
+    
+    L --> N[Cost Calculator]
+    M --> O[Logger]
+    M --> P[Metrics]
     
     style A fill:#e1f5ff
-    style B fill:#fff4e1
-    style C fill:#f0e1ff
-    style H fill:#e1ffe1
+    style C fill:#fff4e1
+    style E fill:#f0e1ff
+    style J fill:#e1ffe1
+    style D fill:#ffe1e1
 ```
 
 ## Project Structure
 
 ```
-ai-sdk/
+ai-providers/
 ├── config/
 │   ├── models.json          # Model configurations and pricing
 │   └── settings.js          # Environment variables and settings
 ├── src/
-│   ├── index.js            # Main entry point (exports AIClient)
+│   ├── index.js            # Main entry point (exports AIClient, plugins)
 │   ├── constants/
 │   │   └── HttpStatus.js   # HTTP status code constants
 │   ├── core/
-│   │   ├── AIClient.js     # Main client class
-│   │   ├── Cost.js         # Cost calculation logic
-│   │   ├── HttpClient.js   # HTTP wrapper with retry support
+│   │   ├── AIClient.js         # Main client class
+│   │   ├── EventEmitter.js     # Event system for lifecycle hooks
+│   │   ├── Plugin.js           # Base plugin class
+│   │   ├── HttpClient.js       # HTTP wrapper with retry support
 │   │   ├── ProviderFactory.js  # Provider instantiation
-│   │   └── Retry.js        # Retry logic implementation
+│   │   └── Retry.js            # Retry logic implementation
+│   ├── plugins/
+│   │   ├── BillingPlugin/
+│   │   │   ├── BillingPlugin.js # Cost tracking plugin
+│   │   │   └── Billing.js      # Billing logic
+│   │   └── TelemetryPlugin/
+│   │       ├── TelemetryPlugin.js # Telemetry plugin
+│   │       ├── Logger.js       # File-based logging
+│   │       ├── Metrics.js      # Performance metrics
+│   │       ├── FileWriter.js   # Async file writing
+│   │       ├── FileRotation.js # Log rotation
+│   │       └── Mutex.js        # File write synchronization
 │   ├── providers/
 │   │   ├── BaseProvider.js     # Abstract base provider
 │   │   ├── GoogleProvider.js   # Google Gemini implementation
@@ -113,13 +136,8 @@ ai-sdk/
 │   ├── errors/
 │   │   └── AIError.js      # Custom error types
 │   └── utils/
-│       ├── sleep.js        # Async delay utility
-│       └── telemetry/
-│           ├── Logger.js   # File-based logging
-│           ├── Metrics.js  # Performance metrics
-│           ├── FileWriter.js   # Async file writing
-│           ├── FileRotation.js # Log rotation
-│           └── Mutex.js    # File write synchronization
+│       ├── Cost.js         # Cost calculation utilities
+│       └── sleep.js        # Async delay utility
 ├── tests/
 │   ├── integration/        # Integration tests
 │   └── providers/          # Provider-specific tests
@@ -191,21 +209,29 @@ Define available models with their settings:
 ### Client Configuration
 
 ```javascript
-const config = {
+import AIClient, { BillingPlugin, TelemetryPlugin } from "@testapiw/ai-providers";
+import models from "./config/models.json" with { type: "json" };
+
+// Initialize client
+const ai = new AIClient({
     models: models,           // Models configuration object
     http: {
         timeout: 60000,       // Request timeout in milliseconds
         retries: 3,           // Number of retry attempts
         retryDelay: 1000      // Delay between retries in ms
-    },
-    telemetry: {
-        enabled: true,        // Enable/disable telemetry
-        directory: "./logs",  // Log file directory
-        maxFileSize: 3145728, // Max log file size (3MB)
-        revisions: 7          // Number of log file revisions to keep
     }
-};
+});
+
+// Add plugins (optional)
+ai.plugins(
+    new BillingPlugin(),      // Cost tracking and billing
+    new TelemetryPlugin()     // Logging and metrics
+);
 ```
+
+**Available Plugins:**
+- `BillingPlugin`: Tracks API costs and usage
+- `TelemetryPlugin`: Provides logging and metrics collection
 
 ## Features
 
@@ -219,9 +245,14 @@ Retry behavior is configurable via the `http.retries` and `http.retryDelay` sett
 
 ### Cost Tracking
 
-Every response includes cost information:
+The `BillingPlugin` automatically tracks API costs:
 
 ```javascript
+import AIClient, { BillingPlugin } from "@testapiw/ai-providers";
+
+const ai = new AIClient({ models })
+    .plugins(new BillingPlugin());
+
 const response = await ai.generate({...});
 
 console.log(response.cost);
@@ -234,12 +265,73 @@ console.log(response.cost);
 
 ### Telemetry
 
-When enabled, the SDK logs:
+The `TelemetryPlugin` provides comprehensive logging and metrics:
+
+```javascript
+import AIClient, { TelemetryPlugin } from "@testapiw/ai-providers";
+
+const ai = new AIClient({ models })
+    .plugins(new TelemetryPlugin({
+        directory: "./logs",        // Log file directory
+        maxFileSize: 3 * 1024 * 1024, // Max file size (3MB)
+        revisions: 7                  // Number of revisions to keep
+    }));
+```
+
+**Telemetry Features:**
 - **Requests/Responses**: Full API interactions
 - **Errors**: Failed requests with context
 - **Metrics**: Performance and usage statistics
+- **Log Rotation**: Automatic rotation when files exceed `maxFileSize`
 
-Logs are automatically rotated when they exceed `maxFileSize`.
+### Plugin System
+
+The SDK supports a modular plugin architecture for extensibility:
+
+```javascript
+import AIClient, { BillingPlugin, TelemetryPlugin } from "@testapiw/ai-providers";
+
+// Use without plugins (minimal setup)
+const ai = new AIClient({ models });
+
+// Or add plugins as needed
+const aiWithPlugins = new AIClient({ models })
+    .plugins(
+        new BillingPlugin(),
+        new TelemetryPlugin({ directory: "./logs" })
+    );
+```
+
+**Creating Custom Plugins:**
+
+```javascript
+import AIClient, { Plugin } from "@testapiw/ai-providers";
+
+class CustomPlugin extends Plugin {
+    constructor() {
+        super("CustomPlugin");
+    }
+    
+    async onRequestStart(request) {
+        console.log("Request started:", request.model);
+    }
+    
+    async onRequestEnd(response) {
+        console.log("Request completed:", response.text);
+    }
+    
+    async onRequestError(error) {
+        console.error("Request failed:", error.message);
+    }
+}
+
+ai.plugins(new CustomPlugin());
+```
+
+**Plugin Events:**
+- `request:start` - Fired before API request
+- `request:end` - Fired after successful response
+- `request:error` - Fired on request failure
 
 ### Unified Interface
 
@@ -351,6 +443,18 @@ Below are screenshots from running the provider tests:
 
 
 ## Supported Models & Features
+
+### Plugin Architecture & Event System (v2.0.0) - 2026-07-20
+Version `2.0.0` introduces a major architectural change with a plugin-based system and event-driven design:
+
+- **Event System**: Added `EventEmitter` for lifecycle events (`request:start`, `request:end`, `request:error`)
+- **Plugin Architecture**: Introduced modular plugin system with `Plugin` base class for extensibility
+- **TelemetryPlugin**: Refactored telemetry (logging and metrics) as a standalone plugin
+- **BillingPlugin**: New plugin for cost tracking and billing management
+- **Breaking Changes**: Client initialization now uses plugins instead of config-based telemetry
+- **Code Organization**: Moved cost calculation utilities to `utils/` for better structure
+
+Plugins can be registered and unregistered dynamically, allowing flexible customization of SDK behavior.
 
 ### OpenAI Architecture Fix (v1.0.2)
 Starting from version `1.0.2`, the provider includes native handling for next-generation reasoning models (`gpt-5`, `gpt-5-mini`, and `o`-series). 
