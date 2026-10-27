@@ -1,6 +1,6 @@
 # AI Providers
 
-[![npm version](https://badge.fury.io/js/@testapiw%2Fai-providers.svg)](https://www.npmjs.com/package/@testapiw/ai-providers)
+[![npm version](https://img.shields.io/npm/v/@testapiw/ai-providers.svg)](https://www.npmjs.com/package/@testapiw/ai-providers)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
 A unified JavaScript SDK for interacting with multiple AI provider APIs (OpenAI, Anthropic, Google, DeepSeek).
