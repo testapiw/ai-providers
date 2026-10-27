@@ -7,7 +7,7 @@ A unified JavaScript SDK for interacting with multiple AI provider APIs (OpenAI,
 
 **Published on npm**: [@testapiw/ai-providers](https://www.npmjs.com/package/@testapiw/ai-providers)
 
-**Changelog**: [CHANGELOG.md](./CHANGELOG.md) — current release is `3.0.0` (breaking provider API changes, see below).
+**Changelog**: [CHANGELOG.md](./CHANGELOG.md) — current release is `3.0.1` (documentation-only; the breaking provider API changes from `3.0.0` are described below).
 
 ## Installation
 

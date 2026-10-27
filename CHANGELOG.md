@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-10-27
+
+Documentation-only release: no runtime, API or behavioural changes.
+
+### Changed
+
+- `README.md`: the npm version badge is now served by shields.io, which reflects
+  a new release within minutes — the previous badge provider cached the version
+  for up to three days and could display a stale number.
+- `README.md`: "current release" reference bumped to `3.0.1`.
+
 ## [3.0.0] - 2026-10-27
 
 Full alignment with the provider API schemas as of October 2026, hardened
@@ -133,7 +144,8 @@ Plugin architecture and event system.
 - Initial release: a unified `AIClient` for OpenAI, Anthropic, Google and
   DeepSeek with automatic retries, cost tracking and telemetry.
 
-[Unreleased]: https://github.com/testapiw/ai-providers/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/testapiw/ai-providers/compare/v3.0.1...HEAD
+[3.0.1]: https://github.com/testapiw/ai-providers/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/testapiw/ai-providers/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/testapiw/ai-providers/compare/v1.0.2...v2.0.0
 [1.0.2]: https://github.com/testapiw/ai-providers/compare/v1.0.0...v1.0.2
