@@ -1,0 +1,176 @@
+{
+  "models": {
+    "gemini-4-argon": {
+      "displayName": "Gemini 4 Argon (Google)",
+      "provider": "google",
+      "apiModel": "gemini-4-argon",
+      "api": "interactions",
+      "apiTier": "paid",
+      "maxTokens": 8192,
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 2.00,
+        "output_per_1m": 10.00,
+        "cached_input_per_1m": 0.10
+      }
+    },
+    "gemini-3.6-flash": {
+      "displayName": "Gemini 3.6 Flash (Google)",
+      "provider": "google",
+      "apiModel": "gemini-3.6-flash",
+      "api": "interactions",
+      "apiTier": "free",
+      "maxTokens": 8192,
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 0.75,
+        "output_per_1m": 3.75,
+        "cached_input_per_1m": 0.075
+      }
+    },
+    "deepseek-flash": {
+      "displayName": "DeepSeek V4.1 Flash",
+      "provider": "deepseek",
+      "apiModel": "deepseek-flash",
+      "temperature": 0.15,
+      "maxTokens": 8192,
+      "capabilities": {
+        "temperature": true,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 0.14,
+        "output_per_1m": 0.28
+      }
+    },
+    "deepseek-v4-pro": {
+      "displayName": "DeepSeek V4 Pro",
+      "provider": "deepseek",
+      "apiModel": "deepseek-v4-pro",
+      "maxTokens": 8192,
+      "effort": "high",
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 0.435,
+        "output_per_1m": 0.87
+      }
+    },
+    "claude-haiku-5-5": {
+      "displayName": "Claude Haiku 5.5",
+      "provider": "anthropic",
+      "apiModel": "claude-haiku-5-5",
+      "maxTokens": 4096,
+      "effort": "low",
+      "thinking": {
+        "type": "adaptive"
+      },
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 0.10,
+        "output_per_1m": 0.50,
+        "cached_input_per_1m": 0.01,
+        "cache_write_per_1m": 0.125
+      }
+    },
+    "claude-sonnet-5-5": {
+      "displayName": "Claude Sonnet 5.5",
+      "provider": "anthropic",
+      "apiModel": "claude-sonnet-5-5",
+      "maxTokens": 8192,
+      "effort": "medium",
+      "thinking": {
+        "type": "adaptive"
+      },
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 2.00,
+        "output_per_1m": 10.00,
+        "cached_input_per_1m": 0.20,
+        "cache_write_per_1m": 2.50
+      }
+    },
+    "claude-opus-5-5": {
+      "displayName": "Claude Opus 5.5",
+      "provider": "anthropic",
+      "apiModel": "claude-opus-5-5",
+      "maxTokens": 8192,
+      "effort": "medium",
+      "thinking": {
+        "type": "adaptive"
+      },
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 4.00,
+        "output_per_1m": 20.00,
+        "cached_input_per_1m": 0.40,
+        "cache_write_per_1m": 5.00
+      }
+    },
+    "gpt-6-luna": {
+      "displayName": "GPT-6 Luna (OpenAI)",
+      "provider": "openai",
+      "apiModel": "gpt-6-luna",
+      "maxTokens": 8192,
+      "effort": "low",
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 0.10,
+        "output_per_1m": 0.50,
+        "cached_input_per_1m": 0.01
+      }
+    },
+    "gpt-6.1-sol": {
+      "displayName": "GPT-6.1 Sol (OpenAI)",
+      "provider": "openai",
+      "apiModel": "gpt-6.1-sol",
+      "maxTokens": 8192,
+      "effort": "medium",
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 2.00,
+        "output_per_1m": 10.00,
+        "cached_input_per_1m": 0.20
+      }
+    },
+    "gpt-6-astra": {
+      "displayName": "GPT-6 Astra (OpenAI)",
+      "provider": "openai",
+      "apiModel": "gpt-6-astra",
+      "maxTokens": 8192,
+      "effort": "medium",
+      "capabilities": {
+        "temperature": false,
+        "reasoning": true
+      },
+      "pricing": {
+        "input_per_1m": 10.00,
+        "output_per_1m": 50.00,
+        "cached_input_per_1m": 1.00
+      }
+    }
+  }
+}

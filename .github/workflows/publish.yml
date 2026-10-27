@@ -1,0 +1,76 @@
+name: Publish to npm
+
+# Publishes @testapiw/ai-providers using npm Trusted Publishing (OIDC).
+# No NPM_TOKEN secret is required: the runner requests a short-lived OIDC token
+# (permissions.id-token: write), npm exchanges it for publish credentials and
+# attaches a provenance attestation to the published tarball.
+
+on:
+    release:
+        types: [published]
+    workflow_dispatch:
+        inputs:
+            dry_run:
+                description: "Dry run — build and verify only, nothing is published"
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+    id-token: write
+
+concurrency:
+    group: publish-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    publish:
+        name: Publish
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 22
+                  # Never cache dependencies in a release build (cache poisoning).
+                  package-manager-cache: false
+
+            # Trusted publishing requires npm >= 11.5.1
+            - name: Upgrade npm
+              run: npm install --global npm@latest
+
+            - name: Install dependencies
+              run: npm ci
+
+            # Provider tests need real API keys, so CI only runs offline checks:
+            # module resolution, dependency audit and tarball contents.
+            - name: Offline checks
+              run: |
+                  node -e "import('./src/index.js').then(m => console.log('exports:', Object.keys(m).join(',')))"
+                  npm audit --audit-level=high
+                  npm pack --dry-run
+
+            - name: Verify release tag matches package.json
+              if: github.event_name == 'release'
+              run: |
+                  version=$(node -p "require('./package.json').version")
+                  tag="${GITHUB_REF_NAME#v}"
+                  echo "package.json: ${version} / tag: ${tag}"
+                  if [ "${version}" != "${tag}" ]; then
+                      echo "::error::package.json version (${version}) does not match the release tag (${tag})"
+                      exit 1
+                  fi
+
+            - name: Publish (dry run)
+              if: github.event_name == 'workflow_dispatch' && inputs.dry_run
+              run: npm publish --dry-run --access public
+
+            - name: Publish with provenance
+              # Requires the npm trusted publisher to allow `npm publish`
+              # (Allowed actions), not only `npm stage publish`.
+              if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)
+              run: npm publish --access public --provenance

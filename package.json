@@ -1,0 +1,64 @@
+{
+  "name": "@testapiw/ai-providers",
+  "version": "3.0.0",
+  "description": "A unified JavaScript SDK for interacting with multiple AI provider APIs (OpenAI, Anthropic, Google, DeepSeek)",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "config",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "test:deepseek": "node tests/providers/deepseek.test.js",
+    "test:google": "node tests/providers/google.test.js",
+    "test:anthropic": "node tests/providers/anthropic.test.js",
+    "test:openai": "node tests/providers/openai.test.js",
+    "test:logger": "node tests/integration/logger.test.js"
+  },
+  "keywords": [
+    "ai",
+    "sdk",
+    "openai",
+    "anthropic",
+    "claude",
+    "google",
+    "gemini",
+    "deepseek",
+    "llm",
+    "gpt",
+    "chatgpt",
+    "api",
+    "unified",
+    "multi-provider",
+    "artificial-intelligence",
+    "machine-learning"
+  ],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/testapiw/ai-providers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/testapiw/ai-providers/issues"
+  },
+  "homepage": "https://github.com/testapiw/ai-providers#readme",
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "dependencies": {
+    "undici": "^7.30.1",
+    "dotenv": "^17.0.0"
+  },
+  "devDependencies": {}
+}
